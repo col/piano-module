@@ -4,8 +4,8 @@ Configure AWS Account
 
     aws configure
 
-    Access Key ID: AKIAJSPBUGGMSKUB6DJA
-    Secret Access Key: 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
+    Access Key ID: ...
+    Secret Access Key: ...
     Region Name: ap-southeast-1
 
 Create THING
