@@ -1,7 +1,15 @@
 var awsIot = require('aws-iot-device-sdk');
 var Gpio = require('chip-gpio').Gpio;
 
-var button = new Gpio(6, 'in', 'both', {
+var button1 = new Gpio(6, 'in', 'both', {
+  debounceTimeout: 500
+});
+
+var button2 = new Gpio(5, 'in', 'both', {
+  debounceTimeout: 500
+});
+
+var button3 = new Gpio(4, 'in', 'both', {
   debounceTimeout: 500
 });
 
@@ -14,23 +22,52 @@ var device = awsIot.device({
   reconnectPeriod: 5000
 });
 
-button.watch(function(err, value) {
+device.subscribe('mozart');
+
+button1.watch(function(err, value) {
   if (err) {
     throw err;
   }
-  console.log('Button pressed');
-  device.subscribe('mozart');
-  device.publish('piano-chip/button', JSON.stringify({ event: 'click' }));
+  console.log('Button1 pressed - Disarmed');
+  device.publish('mozart', JSON.stringify({ event: 'disarmed' }));
+});
+
+button2.watch(function(err, value) {
+  if (err) {
+    throw err;
+  }
+  console.log('Button2 pressed - Boom!');
+  device.publish('mozart', JSON.stringify({ event: 'boom' }));
+});
+
+button3.watch(function(err, value) {
+  if (err) {
+    throw err;
+  }
+  console.log('Button3 pressed - no nothing');
 });
 
 device.on('message', function(topic, payload) {
     console.log('Message Received');
     console.log('Topic: ' + topic);
     console.log('Payload: ' + payload.toString());
+
+    payload = JSON.parse(payload);
+    switch (payload.event) {
+      case "arm":
+        // TODO: change state to armed
+        console.log('Armed!');
+        device.publish('mozart', JSON.stringify({ event: 'armed', device: "piano-chip" }));
+        break;
+      default:
+        console.log("Unhandled event: " + payload.event);
+    }
 });
 
 function exit() {
-  button.unexport();
+  button1.unexport();
+  button2.unexport();
+  button3.unexport();
   process.exit();
 }
 
