@@ -23,6 +23,12 @@ button.watch(function(err, value) {
   device.publish('piano-chip/button', JSON.stringify({ event: 'click' }));
 });
 
+device.on('message', function(topic, payload) {
+    console.log('Message Received');
+    console.log('Topic: ' + topic);
+    console.log('Payload: ' + payload.toString());
+});
+
 function exit() {
   button.unexport();
   process.exit();
